@@ -1,32 +1,37 @@
 const express = require('express');
 const axios = require('axios');
+
 let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
-const public_users = express.Router();
 
+const public_users = express.Router();
 
 public_users.post("/register", (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
-  // Check if both username and password are provided
+  // Validate that username and password were provided.
   if (username && password) {
-    // Check if the user does not already exist
+    // Register only if the username does not already exist.
     if (!isValid(username)) {
-      // Add the new user to the users array
       users.push({ "username": username, "password": password });
-      return res.status(200).json({ message: "User successfully registered. Now you can login" });
+      return res.status(200).json({
+        message: "User successfully registered. Now you can login"
+      });
     } else {
-      return res.status(404).json({ message: "User already exists!" });
+      return res.status(404).json({
+        message: "User already exists!"
+      });
     }
   }
-  // Return error if username or password is missing
-  return res.status(404).json({ message: "Unable to register user." });
+
+  return res.status(404).json({
+    message: "Unable to register user."
+  });
 });
 
-// Get the book list available in the shop
-// Get the book list available in the shop using Promise
+// Task 10: Get the book list available in the shop using Promise callbacks.
 public_users.get('/', function (req, res) {
   new Promise((resolve, reject) => {
     resolve(books);
@@ -41,7 +46,7 @@ public_users.get('/', function (req, res) {
     });
 });
 
-// Task 10: Get the book list available in the shop using async-await with Axios
+// Task 10: Get the book list available in the shop using async-await with Axios.
 public_users.get('/async-books', async function (req, res) {
   try {
     const response = await axios.get('http://localhost:5000/');
@@ -53,8 +58,7 @@ public_users.get('/async-books', async function (req, res) {
   }
 });
 
-// Get book details based on ISBN
-// Get book details based on ISBN using Promise
+// Task 11: Get book details based on ISBN using Promise callbacks.
 public_users.get('/isbn/:isbn', function (req, res) {
   const { isbn } = req.params;
 
@@ -77,7 +81,7 @@ public_users.get('/isbn/:isbn', function (req, res) {
     });
 });
 
-// Task 11: Get book details based on ISBN using async-await with Axios
+// Task 11: Get book details based on ISBN using async-await with Axios.
 public_users.get('/async-isbn/:isbn', async function (req, res) {
   const { isbn } = req.params;
 
@@ -91,8 +95,7 @@ public_users.get('/async-isbn/:isbn', async function (req, res) {
   }
 });
 
-// Get book details based on author
-// Get book details based on author using Promise
+// Task 12: Get book details based on author using Promise callbacks.
 public_users.get('/author/:author', function (req, res) {
   const { author } = req.params;
 
@@ -117,7 +120,7 @@ public_users.get('/author/:author', function (req, res) {
     });
 });
 
-// Task 12: Get book details based on author using async-await with Axios
+// Task 12: Get book details based on author using async-await with Axios.
 public_users.get('/async-author/:author', async function (req, res) {
   const { author } = req.params;
 
@@ -131,8 +134,7 @@ public_users.get('/async-author/:author', async function (req, res) {
   }
 });
 
-// Get all books based on title
-// Get all books based on title using Promise
+// Task 13: Get all books based on title using Promise callbacks.
 public_users.get('/title/:title', function (req, res) {
   const { title } = req.params;
 
@@ -157,7 +159,7 @@ public_users.get('/title/:title', function (req, res) {
     });
 });
 
-// Task 13: Get book details based on title using async-await with Axios
+// Task 13: Get book details based on title using async-await with Axios.
 public_users.get('/async-title/:title', async function (req, res) {
   const { title } = req.params;
 
@@ -171,12 +173,17 @@ public_users.get('/async-title/:title', async function (req, res) {
   }
 });
 
-//  Get book review
+// Get book review based on ISBN.
 public_users.get('/review/:isbn', function (req, res) {
-  const { isbn } = req.params
-  book_review = books[isbn].reviews
-  //Write your code here
-  return res.status(200).send(book_review);
+  const { isbn } = req.params;
+
+  if (!books[isbn]) {
+    return res.status(404).json({
+      message: "Book not found."
+    });
+  }
+
+  return res.status(200).json(books[isbn].reviews);
 });
 
 module.exports.general = public_users;
